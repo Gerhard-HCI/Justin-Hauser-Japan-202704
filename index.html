@@ -461,7 +461,7 @@
         <div class="lock-h">Your running statement</div>
         <p class="lock-p">Enter the access code shared with you to view your itemised charges and balance.</p>
         <div class="pw-row">
-          <input class="pw-input" id="stmt-pw" type="password" inputmode="text" autocomplete="off" placeholder="Access code" aria-label="Access code">
+          <input class="pw-input" id="stmt-pw" type="text" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore name="hci-access" style="-webkit-text-security:disc;text-security:disc" placeholder="Access code" aria-label="Access code">
           <button class="btn" id="stmt-unlock">Open</button>
         </div>
         <div class="lock-err" id="stmt-err"></div>
@@ -1330,7 +1330,7 @@ function render(d){
   unlocked=true; arm();
 }
 function unlock(){
-  var pw=$("#stmt-pw").value; var err=$("#stmt-err");
+  var pw=($("#stmt-pw").value||"").trim(); var err=$("#stmt-err");
   if(!pw){err.textContent="Enter your access code.";return;}
   err.textContent="Checking…";
   tryDecrypt(BLOBS.guest,pw).then(render).catch(function(){
