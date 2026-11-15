@@ -156,6 +156,29 @@
     .map-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:8px 5px;border-radius:var(--radius-sm);font-size:11px;font-weight:500;min-height:34px;border:1px solid var(--border);background:var(--white);color:var(--ink-2);cursor:pointer;-webkit-tap-highlight-color:transparent}
     .map-btn:active{transform:scale(.96)}
     .map-btn.map-disabled{color:var(--border);cursor:default;background:var(--border-lt);border-color:var(--border-lt);pointer-events:none;opacity:.4}
+    /* HCI Taxi card v1.0 · namespaced tx-* · hex-first for iOS Safari · site navy #1F3864 */
+    .map-btn.tx-btn{background-color:#FFFFFF !important;color:#1F3864 !important;border:1px solid #D6DEEA !important;font-weight:600 !important;cursor:pointer !important;-webkit-tap-highlight-color:transparent}
+    .map-btn.tx-btn:active{background-color:#EDF3FB !important}
+    .tx-ov{position:fixed;inset:0;background-color:rgba(20,30,52,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:10000;display:none;align-items:flex-end;justify-content:center}
+    .tx-ov.on{display:flex}
+    .tx-sheet{background-color:#FAF8F4;width:100%;max-width:620px;max-height:92dvh;overflow-y:auto;border-radius:22px 22px 0 0;padding:18px 22px calc(28px + env(safe-area-inset-bottom))}
+    .tx-grab{width:38px;height:4px;background-color:#9AA8BE;border-radius:99px;margin:0 auto 16px;opacity:.45}
+    .tx-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}
+    .tx-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:24px;font-weight:500;color:#1F2A44;line-height:1.2}
+    .tx-title-jp{font-family:'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif;font-size:16px;color:#1F3864;margin-top:3px}
+    .tx-x{width:34px;height:34px;border-radius:50%;background-color:#FFFFFF !important;color:#5A6B85 !important;border:1px solid #E3E8F0;font-size:24px;line-height:1;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer}
+    .tx-card{background-color:#FFFFFF;border:1px solid #E3E8F0;border-radius:16px;padding:26px 22px;text-align:center}
+    .tx-to{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#5A6B85;margin-bottom:14px}
+    .tx-name,.tx-addr,.tx-ask{font-family:'Hiragino Mincho ProN','Yu Mincho','Noto Serif JP',serif;color:#000000;font-weight:600}
+    .tx-name{font-size:30px;line-height:1.3;margin-bottom:6px}
+    .tx-en{font-size:13px;color:#5A6B85;margin-bottom:20px}
+    .tx-addr{font-size:25px;line-height:1.65;padding:18px 10px;border-top:2px solid #000000;border-bottom:2px solid #000000}
+    .tx-ask{font-size:19px;font-weight:400;margin-top:20px;line-height:1.5}
+    .tx-ask-en{font-size:12px;color:#5A6B85;margin-top:5px;font-style:italic}
+    .tx-acts{display:flex;gap:9px;margin-top:20px;flex-wrap:wrap}
+    .tx-act{flex:1 1 0;min-width:0;white-space:nowrap;padding:12px 8px;border-radius:10px;font-size:12.5px;font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid #D6DEEA;background-color:#FFFFFF !important;color:#1F2A44 !important}
+    .tx-act.pri{background-color:#1F3864 !important;color:#FFFFFF !important;border-color:#1F3864}
+    .tx-foot{font-size:11.5px;color:#5A6B85;text-align:center;margin-top:18px;padding-top:14px;border-top:1px solid #E3E8F0;line-height:1.6}
     .map-btn.mp{background:var(--navy);color:#fff;border-color:var(--navy);font-weight:600}
 
     /* UTILITIES */
@@ -475,6 +498,17 @@
 
 <div class="modal-overlay" id="diet-modal" onclick="if(event.target===this)closeDietModal()"><div class="modal"><div class="modal-grabber"></div><div class="modal-head"><div><div class="modal-title">Show the Chef</div><div class="modal-title-jp">食材についてのお願い</div></div><div class="modal-close" onclick="closeDietModal()">×</div></div><div class="modal-intro">No allergies — these are preferences only. Please show this card at the counter so the kitchen can plan around them.</div><div id="modal-jp-content"></div><div class="modal-footer-note">Shared with every restaurant in advance · <em>Happy Camper Ltd.</em></div></div></div>
 
+<div class="tx-ov" id="tx-ov" onclick="if(event.target===this)HCITaxi.close()">
+  <div class="tx-sheet" role="dialog" aria-modal="true" aria-label="Show the driver">
+    <div class="tx-grab"></div>
+    <div class="tx-head">
+      <div><div class="tx-title">Show the driver</div><div class="tx-title-jp">タクシーの運転手にお見せください</div></div>
+      <button type="button" class="tx-x" onclick="HCITaxi.close()" aria-label="Close">&times;</button>
+    </div>
+    <div id="tx-body"></div>
+    <div class="tx-foot">住所は Google マップの日本語表記のとおりです。<br><em>Address shown exactly as Google Maps renders it in Japanese.</em></div>
+  </div>
+</div>
 <div id="toast"></div>
 
 <div id="console">
@@ -530,16 +564,16 @@ var TRIP = {
       ] },
     { date:'2027-03-29', dayNum:2, weekday:'Monday, 29 March', city:'Hakone', cityClass:'', hotel:'Gora Kadan', hq:'Gora Kadan Hakone', hotelNote:'Ryokan · onsen', hosted:false, notes:'',
       stops:[
-        { time:'Daytime', type:'transport', badge:'Transfer', badgeType:'logistics', title:'Transfer to Hakone · Gora Kadan', sub:'', loc:'Gora Kadan', addr:'1300 Gora, Hakone, Kanagawa', q:'Gora Kadan Hakone', notes:'', alert:null },
-        { time:'Evening', type:'restaurant', badge:'Self-booked', badgeType:'self-booked', title:'Gora Kadan dinner', sub:'In-house ryokan kaiseki', loc:'Gora Kadan', addr:'Gora, Hakone', q:'Gora Kadan Hakone', notes:'', alert:null }
+        { time:'Daytime', type:'transport', badge:'Transfer', badgeType:'logistics', title:'Transfer to Hakone · Gora Kadan', sub:'', loc:'Gora Kadan', addr:'1300 Gora, Hakone, Kanagawa', q:'Gora Kadan Hakone', ja:'gorakadan', notes:'', alert:null },
+        { time:'Evening', type:'restaurant', badge:'Self-booked', badgeType:'self-booked', title:'Gora Kadan dinner', sub:'In-house ryokan kaiseki', loc:'Gora Kadan', addr:'Gora, Hakone', q:'Gora Kadan Hakone', ja:'gorakadan', notes:'', alert:null }
       ] },
     { date:'2027-03-30', dayNum:3, weekday:'Tuesday, 30 March', city:'Hakone', cityClass:'', hotel:'Gora Kadan', hq:'Gora Kadan Hakone', hotelNote:'Ryokan · onsen', hosted:false, notes:'',
       stops:[
-        { time:'Evening', type:'restaurant', badge:'Self-booked', badgeType:'self-booked', title:'Gora Kadan dinner', sub:'In-house ryokan kaiseki', loc:'Gora Kadan', addr:'Gora, Hakone', q:'Gora Kadan Hakone', notes:'', alert:null }
+        { time:'Evening', type:'restaurant', badge:'Self-booked', badgeType:'self-booked', title:'Gora Kadan dinner', sub:'In-house ryokan kaiseki', loc:'Gora Kadan', addr:'Gora, Hakone', q:'Gora Kadan Hakone', ja:'gorakadan', notes:'', alert:null }
       ] },
     { date:'2027-03-31', dayNum:4, weekday:'Wednesday, 31 March', city:'Kyoto', cityClass:'kyoto', hotel:'The Shinmonzen', hq:'The Shinmonzen Kyoto', hotelNote:'', hosted:false, notes:'',
       stops:[
-        { time:'Daytime', type:'transport', badge:'Transfer', badgeType:'logistics', title:'Transfer to Kyoto', sub:'', loc:'Kyoto Station', addr:'Kyoto Station, Shimogyo Ward, Kyoto', q:'Kyoto Station', notes:'', alert:null },
+        { time:'Daytime', type:'transport', badge:'Transfer', badgeType:'logistics', title:'Transfer to Kyoto', sub:'', loc:'Kyoto Station', addr:'Kyoto Station, Shimogyo Ward, Kyoto', q:'Kyoto Station', ja:'kyotost', notes:'', alert:null },
         { time:'Midday', type:'restaurant', badge:'To arrange', badgeType:'pending', title:'Lunch', sub:'', loc:'', addr:'', q:'', notes:'', alert:null },
         { time:'Evening', type:'restaurant', badge:'To arrange', badgeType:'pending', title:'Dinner', sub:'', loc:'', addr:'', q:'', notes:'', alert:null }
       ] },
@@ -555,7 +589,7 @@ var TRIP = {
       ] },
     { date:'2027-04-03', dayNum:7, weekday:'Saturday, 3 April', city:'Tokyo', cityClass:'', hotel:'Janu', hq:'Janu Tokyo', hotelNote:'Azabudai Hills', hosted:false, notes:'',
       stops:[
-        { time:'Daytime', type:'transport', badge:'Transfer', badgeType:'logistics', title:'Transfer to Tokyo', sub:'', loc:'Tokyo Station', addr:'Tokyo Station, Chiyoda City, Tokyo', q:'Tokyo Station', notes:'', alert:null },
+        { time:'Daytime', type:'transport', badge:'Transfer', badgeType:'logistics', title:'Transfer to Tokyo', sub:'', loc:'Tokyo Station', addr:'Tokyo Station, Chiyoda City, Tokyo', q:'Tokyo Station', ja:'tokyost', notes:'', alert:null },
         { time:'Evening', type:'restaurant', badge:'To arrange', badgeType:'pending', title:'Dinner', sub:'', loc:'', addr:'', q:'', notes:'', alert:null }
       ] },
     { date:'2027-04-04', dayNum:8, weekday:'Sunday, 4 April', city:'Tokyo', cityClass:'', hotel:'Janu', hq:'Janu Tokyo', hotelNote:'Azabudai Hills', hosted:false, notes:'',
@@ -725,13 +759,124 @@ var DISCOVER_ACTIVE = 'Tokyo';
 
 /* ═══ HELPERS ═══ */
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function gm(q){return(q&&q.indexOf('http')===0)?q:'https://maps.google.com/?q='+encodeURIComponent(q||'Tokyo Japan');}
-function nav(q){return(q&&q.indexOf('http')===0)?q:'https://maps.google.com/maps?daddr='+encodeURIComponent(q||'Tokyo Japan')+'&dirflg=d';}
+/* ═══ JAPANESE PLACE DIRECTORY · for the taxi card (HCI Taxi card v1.0) ═══
+   addr = address in Japanese, as Google Maps shows it to a Japanese user.
+   Every entry cross-checked against Google's romanised address + postcode (Nov 2026).
+   To extend: add an entry and reference it with ja:'<key>' on the stop. */
+var JA_DIR = {
+  gorakadan:{ name:'強羅花壇', en:'Gora Kadan', addr:'〒250-0408 神奈川県足柄下郡箱根町強羅1300', tel:'+81120131331', pid:'ChIJge73U_-hGWARKnkwi9qEB0E' },
+  kyotost:{ name:'京都駅', en:'Kyoto Station', addr:'〒600-8216 京都府京都市下京区東塩小路町', tel:'', pid:'ChIJ7wKLka4IAWARCByidG5EGrY' },
+  tokyost:{ name:'東京駅', en:'Tokyo Station', addr:'〒100-0005 東京都千代田区丸の内1丁目9', tel:'', pid:'ChIJC3Cf2PuLGGAROO00ukl8JwA' }
+};
+/* Full addresses for the Copy button where a stop has no Japanese taxi entry (from Google, Nov 2026) */
+var COPY_ADDR = {
+  "Four Seasons Hotel Tokyo at Otemachi": "Four Seasons Hotel Tokyo at Otemachi, 1-2-1 Ōtemachi, Chiyoda City, Tokyo 100-0004"
+};
+/* Verified Google Place IDs (Nov 2026), keyed by the stop / hotel / wish-list / Discover q value */
+var PLACE_IDS = {
+  "Four Seasons Hotel Tokyo at Otemachi":["Four Seasons Hotel Tokyo at Otemachi", "ChIJ_3Gd30-NGGARnuBcbf29bPA"],
+  "Gora Kadan Hakone":["Gora Kadan", "ChIJge73U_-hGWARKnkwi9qEB0E"],
+  "The Shinmonzen Kyoto":["The Shinmonzen", "ChIJP4C6gNUJAWARnDZ2wSCyMx0"],
+  "Janu Tokyo":["Janu Tokyo", "ChIJEWV5V2-LGGARWr133cObY_8"],
+  "Kyoto Station":["Kyoto Station", "ChIJ7wKLka4IAWARCByidG5EGrY"],
+  "Tokyo Station":["Tokyo Station", "ChIJC3Cf2PuLGGAROO00ukl8JwA"],
+  "Sushi Saito Tokyo":["Sushi Saito", "ChIJscN5u4-LGGARIyRklEh6-e4"],
+  "Sushi Sugita Tokyo":["Nihonbashi Kakigaracho Sugita", "ChIJAQBM40SJGGARE_FACL6szA0"],
+  "Tempura Motoyoshi Tokyo":["Tempura Motoyoshi", "ChIJ3cFPK-aLGGARNaz58SuwM7M"],
+  "Ginza Ukai-tei Tokyo":["Ginza Ukai-tei", "ChIJf38F8OCLGGAR3vsQeUZEBYY"],
+  "Ishikawa Kagurazaka Tokyo":["Kagurazaka Ishikawa", "ChIJa0WEW1qMGGARPztXG-uvYjI"],
+  "Miyoshi Kyoto":["Nikunotakumi Miyoshi", "ChIJ10NH2MMIAWARGQ-o1Y6eHhw"],
+  "Cenci Kyoto":["Cenci", "ChIJw2vMBfAIAWAR86pLyFaUBas"],
+  "Shunji Tokyo sushi":["Shunji", "ChIJQ7vkUDaLGGAR6qq4tuxpeYQ"],
+  "Monk Kyoto restaurant":["Monk", "ChIJF7ckRhsJAWAR4RfB9jaYHt4"],
+  "Ryogoku Kokugikan Tokyo":["Ryogoku Kokugikan", "ChIJGeu4VDWJGGARdPoda8d8I3A"],
+  "Toyosu Market Tokyo":["Toyosu Market", "ChIJW4-7z_iJGGAR3DNQUg6tv9Y"],
+  "Shunkaen Bonsai Museum Tokyo":["Shunkaen Bonsai Museum", "ChIJ28yGflGGGGARbbeDZDJafLg"],
+  "Mori Art Museum Tokyo":["Mori Art Museum", "ChIJg5RCD3eLGGAR6dbIHRM98w8"],
+  "Shibuya Crossing Tokyo":["Shibuya Scramble Crossing", "ChIJK9EM68qLGGARacmu4KJj5SA"],
+  "Golden Gai Shinjuku Tokyo":["Shinjuku Golden Gai", "ChIJr7mGZdmMGGARjxoMFeHApXE"],
+  "Tsutaya Daikanyama Tokyo":["Tsutaya Books Daikanyama", "ChIJgfjQvk-LGGARqVwq1_ra-dY"],
+  "Mimi bar Tokyo":["Bar Mimi", "ChIJVVXwVu-LGGARRmznY7IzSY0"],
+  "Star Bar Ginza Tokyo":["Star Bar Ginza", "ChIJTxtUYuSLGGARs42DAtXXddE"],
+  "Gen Yamamoto Tokyo":["Gen Yamamoto", "ChIJCzplpp-LGGARsszLPxhnHn4"],
+  "Senso-ji Temple Asakusa Tokyo":["Senso-ji", "ChIJ8T1GpMGOGGARDYGSgpooDWw"],
+  "Meiji Shrine Tokyo":["Meiji Jingu", "ChIJ5SZMmreMGGARcz8QSTiJyo8"],
+  "Shibuya Sky Tokyo":["Shibuya Sky", "ChIJ4Rr2JWiLGGARcyRSHuZ-9G8"],
+  "Nezu Museum Tokyo":["Nezu Museum", "ChIJxU48-2OLGGARHMtB5RAhytA"],
+  "Ginza Mitsukoshi depachika Tokyo":["Mitsukoshi Ginza", "ChIJX9MhjuaLGGARvoMvduRK-5E"],
+  "Hakone Open-Air Museum":["The Hakone Open-Air Museum", "ChIJMfOWowSiGWARX2wK6ac5jlg"],
+  "Hakone Shrine Lake Ashi":["Hakone Shrine", "ChIJtcIqzYuYGWARmuDHR2ij5Ko"],
+  "Owakudani Hakone":["Owakudani", "ChIJfw3hyDefGWARilyx_0ZSqKE"],
+  "Hakone Old Tokaido cedar avenue":["Old Tokaido Road Ancient Cedar Avenue", "ChIJMVyclmSYGWARjhNR0fySWLo"],
+  "Hakone Checkpoint":["Hakone Sekisho", "ChIJ8xdp8WSYGWARRaUVLnalZyM"],
+  "Pola Museum of Art Hakone":["Pola Museum of Art", "ChIJr3KVs2qfGWAR3xgPYVnRi44"],
+  "Hakone Venetian Glass Museum":["Hakone Venetian Glass Museum", "ChIJqUsQTwyfGWARsMAxhOkaqAs"],
+  "Okada Museum of Art Hakone":["Okada Museum of Art", "ChIJmaJ8rwiiGWAR3squbZbHiZI"],
+  "Narukawa Art Museum Hakone":["Narukawa Art Museum", "ChIJ-4uFVHuYGWARWw3yS0rV3SE"],
+  "Gora Park Hakone":["Hakone Gora Park", "ChIJVVVltv-hGWARRGEjZVZEtqs"],
+  "Hakone Wetlands Botanical Garden":["Hakone Botanical Garden of Wetlands", "ChIJsbUfIQefGWARtjZTEureov0"],
+  "Amasake Chaya Hakone":["Amazake-chaya Teahouse", "ChIJ7XvjLIeiGWARC9MOeCs7c8k"],
+  "Bakery and Table Hakone":["Bakery & Table Hakone", "ChIJ10rntXyYGWARz9ZcBQYInMg"],
+  "Fushimi Inari Kyoto":["Fushimi Inari Taisha", "ChIJIW0uPRUPAWAR6eI6dRzKGns"],
+  "Arashiyama Bamboo Grove Kyoto":["Arashiyama Bamboo Forest", "ChIJrYtcv-urAWAR3XzWvXv8n_s"],
+  "Kiyomizudera Kyoto":["Kiyomizu-dera", "ChIJB_vchdMIAWARujTEUIZlr2I"],
+  "Nishiki Market Kyoto":["Nishiki Market", "ChIJT8uMzZwIAWARnGzsARCjnrY"],
+  "Aritsugu Kyoto":["Aritsugu", "ChIJC22qp5YIAWARv05WQc6yDCw"],
+  "Ippodo Tea Kyoto":["Ippodo Tea Kyoto Main Store", "ChIJcadqE4wIAWAR2BeU0_UOXtE"]
+};
+function gm(q){if(q&&q.indexOf('http')===0)return q;var p=PLACE_IDS[q];if(p)return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(p[0])+'&query_place_id='+p[1];return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q||'Tokyo Japan');}
+function nav(q){var p=PLACE_IDS[q];if(p)return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p[0])+'&destination_place_id='+p[1]+'&travelmode=driving';if(q&&q.indexOf('http')===0)return q;return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(q||'Tokyo Japan')+'&travelmode=driving';}
+/* ═══ HCI Taxi card v1.0 · Show the driver ═══ */
+var TAXI_CFG = {
+  extra: function(ctx){ return null; },  /* no drivers assigned yet → GO Taxi */
+  goTaxi: { label:'🚕 GO Taxi', href:'https://go.mo-t.com/' }
+};
+var HCITaxi = (function(){
+  function e(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function mapsUrl(j){
+    if(!j.pid) return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(j.name+' '+j.addr);
+    return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(j.en)+'&query_place_id='+encodeURIComponent(j.pid);
+  }
+  function key(s){
+    if(!s) return null;
+    if(s.type==='flight'||s.status==='suggestion'||s.badgeType==='suggestion'||s.badgeType==='pending') return null;
+    var k = typeof s==='string' ? s : s.ja;
+    return (k && JA_DIR[k]) ? k : null;
+  }
+  function show(k, ctx){
+    var j=JA_DIR[k]; if(!j) return;
+    var x=(TAXI_CFG.extra&&TAXI_CFG.extra(ctx||{}))||TAXI_CFG.goTaxi;
+    document.getElementById('tx-body').innerHTML=''
+      +'<div class="tx-card">'
+      +  '<div class="tx-to">行き先 · DESTINATION</div>'
+      +  '<div class="tx-name">'+e(j.name)+'</div>'
+      +  '<div class="tx-en">'+e(j.en)+'</div>'
+      +  '<div class="tx-addr">'+e(j.addr)+'</div>'
+      +  '<div class="tx-ask">ここまでお願いします。</div>'
+      +  '<div class="tx-ask-en">Please take me here.</div>'
+      +'</div>'
+      +'<div class="tx-acts">'
+      +  '<a class="tx-act pri" href="'+e(mapsUrl(j))+'" target="_blank" rel="noopener">📍 Maps</a>'
+      +  (j.tel?'<a class="tx-act" href="tel:'+e(j.tel)+'">📞 Call venue</a>':'')
+      +  (x?'<a class="tx-act" href="'+e(x.href)+'" target="_blank" rel="noopener">'+e(x.label)+'</a>':'')
+      +'</div>';
+    document.getElementById('tx-ov').classList.add('on');
+    document.body.style.overflow='hidden';
+  }
+  function close(){
+    var o=document.getElementById('tx-ov'); if(o) o.classList.remove('on');
+    document.body.style.overflow='';
+  }
+  document.addEventListener('keydown',function(ev){ if(ev.key==='Escape') close(); });
+  return { key:key, show:show, close:close };
+})();
+window.HCITaxi=HCITaxi;
 var toastTm;
 function showToast(msg){var el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastTm);toastTm=setTimeout(function(){el.classList.remove('show');},2200);}
 window.copyAddr=function(di,si){
   var stop=TRIP.days[di].stops[si];
-  var txt=(stop.addr&&stop.addr!=='Tokyo'&&stop.addr!=='Kyoto')?stop.addr:stop.loc;
+  var j=stop.ja&&JA_DIR[stop.ja];
+  var txt=j?(j.en+' · '+j.addr):(COPY_ADDR[stop.q]||((stop.addr&&stop.addr!=='Tokyo'&&stop.addr!=='Kyoto')?stop.addr:stop.loc));
   if(!txt)return;
   if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(txt).then(function(){showToast('Address copied');});}
   else{var ta=document.createElement('textarea');ta.value=txt;ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);showToast('Address copied');}
@@ -773,11 +918,16 @@ function renderStop(stop,di,si){
   var badge=stop.badge?'<span class="stop-badge '+stop.badgeType+'">'+esc(stop.badge)+'</span>':'';
   var dotClass=isSuggestion?'t-suggestion':('t-'+(stop.type||'restaurant'));
   var cardClass=stop.badgeType==='suggestion'?' is-suggestion':(stop.badgeType==='pending'?' is-pending':'');
+  var txKey=HCITaxi.key(stop);
+  var taxiBtn=txKey
+    ?'<button type="button" class="map-btn tx-btn" onclick="HCITaxi.show(\''+txKey+'\',{day:'+di+',stop:'+si+'})" aria-label="Show the taxi driver the Japanese address">🚕 Taxi</button>'
+    :'<span class="map-btn map-disabled">🚕</span>';
   var mapHTML=isActionable&&hasLoc
     ?'<a href="'+gm(stop.q)+'" target="_blank" rel="noopener" class="map-btn mp">📍 Maps</a>'
       +'<a href="'+nav(stop.q)+'" target="_blank" rel="noopener" class="map-btn">🧭 Nav</a>'
+      +taxiBtn
       +'<button class="map-btn" onclick="copyAddr('+di+','+si+')">⎘ Copy</button>'
-    :'<span class="map-btn map-disabled">📍</span><span class="map-btn map-disabled">🧭</span><span class="map-btn map-disabled">⎘</span>';
+    :'<span class="map-btn map-disabled">📍</span><span class="map-btn map-disabled">🧭</span>'+taxiBtn+'<span class="map-btn map-disabled">⎘</span>';
   return '<div class="stop-item">'
     +'<div class="stop-time">'+(stop.time?stop.time.replace('~',''):'')+'</div>'
     +'<div class="stop-dot '+dotClass+'"></div>'
@@ -1111,15 +1261,15 @@ function renderEmergency(){
     +'</div>'
     +'<div class="section-label">Medical — English-friendly</div>'
     +'<div class="contact-card">'
-    +'<div class="contact-row"><div class="contact-left"><div class="contact-icon ci-b">🏥</div><div><div class="contact-label">Kyoto University Hospital</div><div class="contact-sub">Kyoto · major teaching hospital</div></div></div><a href="https://maps.google.com/?q=Kyoto+University+Hospital" target="_blank" rel="noopener" class="call-btn cn">📍 Map</a></div>'
-    +'<div class="contact-row"><div class="contact-left"><div class="contact-icon ci-b">🏥</div><div><div class="contact-label">Odawara Municipal Hospital</div><div class="contact-sub">Odawara · nearest to Hakone</div></div></div><a href="https://maps.google.com/?q=Odawara+Municipal+Hospital" target="_blank" rel="noopener" class="call-btn cn">📍 Map</a></div>'
+    +'<div class="contact-row"><div class="contact-left"><div class="contact-icon ci-b">🏥</div><div><div class="contact-label">Kyoto University Hospital</div><div class="contact-sub">Kyoto · major teaching hospital</div></div></div><a href="https://www.google.com/maps/search/?api=1&query=Kyoto+University+Hospital&query_place_id=ChIJ0YTIEJIJAWAROplUmuqPhwE" target="_blank" rel="noopener" class="call-btn cn">📍 Map</a></div>'
+    +'<div class="contact-row"><div class="contact-left"><div class="contact-icon ci-b">🏥</div><div><div class="contact-label">Odawara Municipal Hospital</div><div class="contact-sub">Odawara · nearest to Hakone</div></div></div><a href="https://www.google.com/maps/search/?api=1&query=Odawara+Municipal+Hospital&query_place_id=ChIJVVWVCUakGWARfblrbtqCDBA" target="_blank" rel="noopener" class="call-btn cn">📍 Map</a></div>'
     +'<div class="contact-row"><div class="contact-left"><div class="contact-icon ci-b">🏥</div><div><div class="contact-label">Tokyo Midtown Clinic</div><div class="contact-sub">Roppongi · 24h English support</div></div></div><a href="tel:+81354137912" class="call-btn cb">📞 Call</a></div>'
     +'<div class="contact-row"><div class="contact-left"><div class="contact-icon ci-b">🏥</div><div><div class="contact-label">St. Luke\'s International</div><div class="contact-sub">Tsukiji, Tokyo · English staff 24/7</div></div></div><a href="tel:+81335415151" class="call-btn cb">📞 Call</a></div>'
     +'</div>'
     +'<div class="section-label">Embassy &amp; Consulate</div>'
     +'<div class="contact-card">'
     +'<div class="contact-row"><div class="contact-left"><div class="contact-icon ci-o">🇺🇸</div><div><div class="contact-label">US Embassy Tokyo</div><div class="contact-sub">Akasaka, Minato-ku</div></div></div><a href="tel:+81332245000" class="call-btn cn">📞 Call</a></div>'
-    +'<div class="contact-row"><div class="contact-left"><div class="contact-icon ci-o">🇺🇸</div><div><div class="contact-label">US Consulate Osaka-Kobe</div><div class="contact-sub">Kita-ku, Osaka · nearest to Kyoto</div></div></div><a href="https://maps.google.com/?q=US+Consulate+General+Osaka-Kobe" target="_blank" rel="noopener" class="call-btn cn">📍 Map</a></div>'
+    +'<div class="contact-row"><div class="contact-left"><div class="contact-icon ci-o">🇺🇸</div><div><div class="contact-label">US Consulate Osaka-Kobe</div><div class="contact-sub">Kita-ku, Osaka · nearest to Kyoto</div></div></div><a href="https://www.google.com/maps/search/?api=1&query=U.S.+Consulate+General+Osaka-Kobe&query_place_id=ChIJRyw_SunmAGAROL3ldRdvNKI" target="_blank" rel="noopener" class="call-btn cn">📍 Map</a></div>'
     +'</div>'
     +'<div class="util-card"><ul class="info-list"><li><span class="info-emoji">ℹ️</span><div class="info-text"><strong>In a consular emergency</strong>Contact your own country\'s embassy in Tokyo. For any medical or safety emergency, dial 119 (ambulance) or 110 (police) first — operators can route English support.</div></li></ul></div>';
 }
